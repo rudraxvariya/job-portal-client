@@ -40,3 +40,140 @@
 .read-the-docs {
   color: #888;
 }
+
+/* User Profile Form */
+.user-profile-page {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.profile-photo-wrap {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.profile-photo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto;
+}
+
+.profile-photo-placeholder {
+  background: #e0e0e0;
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 120px;
+  text-align: center;
+}
+
+.user-profile-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.user-profile-form label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.user-profile-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.user-profile-form .form-error {
+  display: block;
+  color: #c00;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.user-profile-form .form-hint {
+  display: block;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.user-profile-form button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+/* Login Page */
+.login-page {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.login-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.login-form .form-error {
+  display: block;
+  color: #c00;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.login-form button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+/* Home / Jobs */
+.home-page {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.home-page h1 {
+  margin-bottom: 1.5rem;
+}
+
+.home-page-error {
+  color: #c00;
+}
+
+.jobs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.jobs-empty {
+  color: #666;
+}
+
+.job-card {
+  padding: 1.25rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: rgb(64, 62, 62);
+}
