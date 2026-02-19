@@ -5,12 +5,36 @@ import type { Job } from "../../types/job";
 import { JOB_STATUSES, JOB_TYPES } from "../../types/job";
 
 const DEFAULT_LIMIT = 10;
+const LIMIT_OPTIONS = [10, 20, 30] as const;
 const SORT_OPTIONS = [
   { value: "a-z", label: "Name (A-Z)" },
   { value: "z-a", label: "Name (Z-A)" },
   { value: "latest", label: "Latest" },
   { value: "oldest", label: "Oldest" },
 ] as const;
+
+/** Returns page numbers and "ellipsis" for compact pagination (e.g. 1 ... 5 6 7 ... 100). */
+function getPaginationItems(
+  current: number,
+  numOfPages: number,
+  delta = 2,
+): (number | "ellipsis")[] {
+  if (numOfPages <= 0) return [];
+  if (numOfPages <= 7) {
+    return Array.from({ length: numOfPages }, (_, i) => i + 1);
+  }
+  const pages = new Set<number>([1, numOfPages]);
+  const low = Math.max(1, current - delta);
+  const high = Math.min(numOfPages, current + delta);
+  for (let i = low; i <= high; i++) pages.add(i);
+  const sorted = [...pages].sort((a, b) => a - b);
+  const result: (number | "ellipsis")[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (i > 0 && sorted[i] - sorted[i - 1] > 1) result.push("ellipsis");
+    result.push(sorted[i]);
+  }
+  return result;
+}
 
 type JobsApiResponse = {
   jobs: Job[];
@@ -21,7 +45,10 @@ type JobsApiResponse = {
 export function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
-  const limit = Math.max(1, Math.min(50, parseInt(searchParams.get("limit") ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT));
+  const limitParam = searchParams.get("limit");
+  const limit = LIMIT_OPTIONS.includes(Number(limitParam) as (typeof LIMIT_OPTIONS)[number])
+    ? (Number(limitParam) as (typeof LIMIT_OPTIONS)[number])
+    : DEFAULT_LIMIT;
   const search = searchParams.get("search") ?? "";
   const jobStatus = searchParams.get("jobStatus") ?? "";
   const jobType = searchParams.get("jobType") ?? "";
@@ -130,9 +157,9 @@ export function Home() {
         </Link>
       </div>
 
-      {/* Search, filters, sort */}
+      {/* Search, filters, sort, limit */}
       <div className="mb-6 p-4 rounded-xl border border-gray-200 bg-white shadow-sm space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="sm:col-span-2 lg:col-span-1">
             <label htmlFor="home-search" className="block text-sm font-medium text-gray-700 mb-1">
               Search
@@ -195,6 +222,25 @@ export function Home() {
               {SORT_OPTIONS.map((o) => (
                 <option key={o.value} value={o.value}>
                   {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="home-limit" className="block text-sm font-medium text-gray-700 mb-1">
+              Per page
+            </label>
+            <select
+              id="home-limit"
+              value={limit}
+              onChange={(e) =>
+                setParams({ limit: Number(e.target.value) as (typeof LIMIT_OPTIONS)[number], page: 1 })
+              }
+              className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              {LIMIT_OPTIONS.map((n) => (
+                <option key={n} value={n}>
+                  {n}
                 </option>
               ))}
             </select>
@@ -274,7 +320,7 @@ export function Home() {
             ))}
           </div>
 
-          {/* Pagination */}
+          {/* Pagination - compact with ellipsis for large page counts */}
           {numOfPages > 1 && (
             <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
               <button
@@ -285,20 +331,28 @@ export function Home() {
               >
                 Previous
               </button>
-              <div className="flex flex-wrap items-center justify-center gap-1">
-                {Array.from({ length: numOfPages }, (_, i) => i + 1).map(
-                  (p) => (
+              <div className="flex items-center justify-center gap-1">
+                {getPaginationItems(page, numOfPages).map((item, i) =>
+                  item === "ellipsis" ? (
+                    <span
+                      key={`ellipsis-${i}`}
+                      className="min-w-9 px-1 py-2 text-center text-gray-400"
+                      aria-hidden
+                    >
+                      …
+                    </span>
+                  ) : (
                     <button
-                      key={p}
+                      key={item}
                       type="button"
-                      onClick={() => goToPage(p)}
+                      onClick={() => goToPage(item)}
                       className={`min-w-9 rounded-lg border px-3 py-2 text-sm font-medium ${
-                        p === page
+                        item === page
                           ? "border-blue-600 bg-blue-600 text-white"
                           : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
                       }`}
                     >
-                      {p}
+                      {item}
                     </button>
                   ),
                 )}
