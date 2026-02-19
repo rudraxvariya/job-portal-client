@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import axios from "axios";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
+import { Input, Button } from "../common";
 import { axiosInstance } from "../../config/axios";
 
 interface CurrentUserResponse {
@@ -115,94 +117,87 @@ export function UserProfileForm() {
 
     try {
       await axiosInstance.patch("/users/update-user", formData);
-      const { data } = await axiosInstance.get<CurrentUserResponse>("/users/current-user");
+      const { data } = await axiosInstance.get<CurrentUserResponse>(
+        "/users/current-user",
+      );
       const user = data.user ?? data;
       const u = user as { avatar?: string };
       setAvatarUrl(u?.avatar ?? null);
+      toast.success("Profile updated successfully.");
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        const message = (err.response.data as { message?: string }).message;
-        setSubmitError(message ?? `Request failed: ${err.response.status}`);
-      } else {
-        setSubmitError(
-          err instanceof Error ? err.message : "Something went wrong",
-        );
-      }
+      const message =
+        (err as AxiosError<{ msg?: string }>).response?.data?.msg ??
+        `Request failed: ${(err as AxiosError<{ status?: number }>).response?.status}`;
+      setSubmitError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (isLoadingUser) {
-    return <p className="user-profile-form">Loading profile...</p>;
+    return <p className="max-w-md text-gray-600">Loading profile...</p>;
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="user-profile-form">
-      <div className="profile-photo-wrap">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-md mt-5">
+      <div className="flex justify-center mb-6">
         {photoSrc ? (
-          <img src={photoSrc} alt="Profile" className="profile-photo" />
+          <img
+            src={photoSrc}
+            alt="Profile"
+            className="h-28 w-28 rounded-full object-cover border-2 border-gray-200"
+          />
         ) : (
-          <div className="profile-photo profile-photo-placeholder">No photo</div>
+          <div className="h-28 w-28 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+            No photo
+          </div>
         )}
       </div>
-      <div className="form-group">
-        <label htmlFor="name">Name</label>
-        <input id="name" {...register("name")} />
-        {errors.name && (
-          <span className="form-error">{errors.name.message}</span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" {...register("email")} />
-        {errors.email && (
-          <span className="form-error">{errors.email.message}</span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="lastName">Last Name</label>
-        <input id="lastName" {...register("lastName")} />
-        {errors.lastName && (
-          <span className="form-error">{errors.lastName.message}</span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="location">Location</label>
-        <input id="location" {...register("location")} />
-        {errors.location && (
-          <span className="form-error">{errors.location.message}</span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="avatar">Avatar</label>
-        <input
-          id="avatar"
+      <Input
+        id="profile-name"
+        label="Name"
+        error={errors.name?.message}
+        {...register("name")}
+      />
+      <Input
+        id="profile-email"
+        type="email"
+        label="Email"
+        error={errors.email?.message}
+        {...register("email")}
+      />
+      <Input
+        id="profile-lastName"
+        label="Last Name"
+        error={errors.lastName?.message}
+        {...register("lastName")}
+      />
+      <Input
+        id="profile-location"
+        label="Location"
+        error={errors.location?.message}
+        {...register("location")}
+      />
+      <div className="w-full">
+        <Input
+          id="profile-avatar"
           type="file"
           accept="image/*"
+          label="Avatar (optional)"
+          error={errors.avatar?.message}
           {...register("avatar")}
         />
-        <span className="form-hint">Leave empty to keep current avatar</span>
-        {errors.avatar && (
-          <span className="form-error">{errors.avatar.message}</span>
-        )}
-      </div>
-
-      {submitError && (
-        <span
-          className="form-error"
-          style={{ display: "block", marginBottom: "0.5rem" }}
-        >
-          {submitError}
+        <span className="mt-1 block text-sm text-gray-500">
+          Leave empty to keep current avatar
         </span>
+      </div>
+      {submitError && (
+        <span className="block text-sm text-red-600">{submitError}</span>
       )}
-      <button type="submit" disabled={isSubmitting}>
+      <Button type="submit" disabled={isSubmitting} fullWidth>
         {isSubmitting ? "Submitting..." : "Submit"}
-      </button>
+      </Button>
     </form>
   );
 }

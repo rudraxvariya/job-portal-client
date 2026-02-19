@@ -1,44 +1,5 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
 .card {
   padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }
 
 /* User Profile Form */
@@ -146,9 +107,46 @@
   cursor: pointer;
 }
 
+/* Signup Page */
+.signup-page {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.signup-form .form-group {
+  margin-bottom: 1rem;
+}
+
+.signup-form label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.signup-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.signup-form .form-error {
+  display: block;
+  color: #c00;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.signup-form button {
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
 /* Home / Jobs */
 .home-page {
-  max-width: 900px;
   margin: 0 auto;
   text-align: left;
 }
@@ -175,5 +173,4 @@
   padding: 1.25rem;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  background: rgb(64, 62, 62);
 }

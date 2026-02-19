@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useForm, type Resolver } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import axios from "axios";
+import { toast } from "react-toastify";
+import { AxiosError } from "axios";
+import { Input, Button } from "../common";
+import { setLoggedInThisSession } from "../../lib/auth";
 import { axiosInstance } from "../../config/axios";
 
 export interface LoginFormData {
@@ -21,6 +24,11 @@ const defaultValues: LoginFormData = {
   password: "",
 };
 
+const DEMO_CREDENTIALS: LoginFormData = {
+  email: "test@gmail.com",
+  password: "test1234",
+};
+
 export function LoginForm() {
   const navigate = useNavigate();
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -35,7 +43,7 @@ export function LoginForm() {
     defaultValues,
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const doLogin = async (data: LoginFormData) => {
     setSubmitError(null);
     setIsSubmitting(true);
     try {
@@ -43,50 +51,58 @@ export function LoginForm() {
         email: data.email,
         password: data.password,
       });
-      navigate("/update-profile", { replace: true });
+      setLoggedInThisSession();
+      toast.success("Signed in successfully.");
+      navigate("/", { replace: true });
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.data) {
-        const message = (err.response.data as { message?: string }).message;
-        setSubmitError(message ?? `Request failed: ${err.response.status}`);
-      } else {
-        setSubmitError(err instanceof Error ? err.message : "Something went wrong");
-      }
+      const message =
+        (err as AxiosError<{ msg?: string }>).response?.data?.msg ??
+        `Request failed: ${(err as AxiosError<{ status?: number }>).response?.status}`;
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const onSubmit = (data: LoginFormData) => doLogin(data);
+
+  const onDemoLogin = () => doLogin(DEMO_CREDENTIALS);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="login-form">
-      <div className="form-group">
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" {...register("email")} autoComplete="email" />
-        {errors.email && (
-          <span className="form-error">{errors.email.message}</span>
-        )}
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          {...register("password")}
-          autoComplete="current-password"
-        />
-        {errors.password && (
-          <span className="form-error">{errors.password.message}</span>
-        )}
-      </div>
-
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <Input
+        id="login-email"
+        type="email"
+        label="Email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        error={errors.email?.message}
+        {...register("email")}
+      />
+      <Input
+        id="login-password"
+        type="password"
+        label="Password"
+        placeholder="••••••••"
+        autoComplete="current-password"
+        error={errors.password?.message}
+        {...register("password")}
+      />
       {submitError && (
-        <span className="form-error" style={{ display: "block", marginBottom: "0.5rem" }}>
-          {submitError}
-        </span>
+        <span className="block text-sm text-red-600">{submitError}</span>
       )}
-      <button type="submit" disabled={isSubmitting}>
+      <Button type="submit" disabled={isSubmitting} fullWidth>
         {isSubmitting ? "Signing in..." : "Sign in"}
-      </button>
+      </Button>
+      <Button
+        type="button"
+        variant="secondary"
+        disabled={isSubmitting}
+        fullWidth
+        onClick={onDemoLogin}
+      >
+        Demo user login
+      </Button>
     </form>
   );
 }
