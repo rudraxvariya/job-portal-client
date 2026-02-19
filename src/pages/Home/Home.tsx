@@ -1,10 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { axiosInstance } from "../../config/axios";
 import type { Job } from "../../types/job";
 import { JOB_STATUSES, JOB_TYPES } from "../../types/job";
 
 const DEFAULT_LIMIT = 10;
+const SEARCH_DEBOUNCE_MS = 800;
 const LIMIT_OPTIONS = [10, 20, 30] as const;
 const SORT_OPTIONS = [
   { value: "a-z", label: "Name (A-Z)" },
@@ -46,19 +47,15 @@ export function Home() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
   const limitParam = searchParams.get("limit");
-  const limit = LIMIT_OPTIONS.includes(Number(limitParam) as (typeof LIMIT_OPTIONS)[number])
+  const limit = LIMIT_OPTIONS.includes(
+    Number(limitParam) as (typeof LIMIT_OPTIONS)[number],
+  )
     ? (Number(limitParam) as (typeof LIMIT_OPTIONS)[number])
     : DEFAULT_LIMIT;
   const search = searchParams.get("search") ?? "";
   const jobStatus = searchParams.get("jobStatus") ?? "";
   const jobType = searchParams.get("jobType") ?? "";
   const sort = searchParams.get("sort") ?? "a-z";
-
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [numOfPages, setNumOfPages] = useState(0);
-  const [totalJobs, setTotalJobs] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const setParams = useCallback(
     (updates: Record<string, string | number>) => {
@@ -76,6 +73,37 @@ export function Home() {
     [setSearchParams],
   );
 
+  const [searchInput, setSearchInput] = useState(search);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, []);
+
+  const handleSearchChange = useCallback(
+    (value: string) => {
+      setSearchInput(value);
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        setParams({ search: value, page: 1 });
+        searchDebounceRef.current = null;
+      }, SEARCH_DEBOUNCE_MS);
+    },
+    [setParams],
+  );
+
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [numOfPages, setNumOfPages] = useState(0);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     let cancelled = false;
     async function fetchJobs() {
@@ -90,13 +118,15 @@ export function Home() {
         if (jobType) params.set("jobType", jobType);
         if (sort) params.set("sort", sort);
 
-        const { data } = await axiosInstance.get<JobsApiResponse | { jobs: Job[] }>(
-          `/jobs?${params.toString()}`,
-        );
+        const { data } = await axiosInstance.get<
+          JobsApiResponse | { jobs: Job[] }
+        >(`/jobs?${params.toString()}`);
 
         if (cancelled) return;
 
-        const list = Array.isArray(data) ? data : (data as JobsApiResponse).jobs ?? [];
+        const list = Array.isArray(data)
+          ? data
+          : ((data as JobsApiResponse).jobs ?? []);
         setJobs(list);
 
         if (data && !Array.isArray(data) && "numOfPages" in data) {
@@ -161,26 +191,34 @@ export function Home() {
       <div className="mb-6 p-4 rounded-xl border border-gray-200 bg-white shadow-sm space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="sm:col-span-2 lg:col-span-1">
-            <label htmlFor="home-search" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="home-search"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Search
             </label>
             <input
               id="home-search"
               type="search"
               placeholder="Position, company..."
-              value={search}
-              onChange={(e) => setParams({ search: e.target.value, page: 1 })}
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="mt-0 block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label htmlFor="home-jobStatus" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="home-jobStatus"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Status
             </label>
             <select
               id="home-jobStatus"
               value={jobStatus}
-              onChange={(e) => setParams({ jobStatus: e.target.value, page: 1 })}
+              onChange={(e) =>
+                setParams({ jobStatus: e.target.value, page: 1 })
+              }
               className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
               <option value="">All</option>
@@ -192,7 +230,10 @@ export function Home() {
             </select>
           </div>
           <div>
-            <label htmlFor="home-jobType" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="home-jobType"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Type
             </label>
             <select
@@ -210,7 +251,10 @@ export function Home() {
             </select>
           </div>
           <div>
-            <label htmlFor="home-sort" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="home-sort"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Sort
             </label>
             <select
@@ -227,14 +271,22 @@ export function Home() {
             </select>
           </div>
           <div>
-            <label htmlFor="home-limit" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="home-limit"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Per page
             </label>
             <select
               id="home-limit"
               value={limit}
               onChange={(e) =>
-                setParams({ limit: Number(e.target.value) as (typeof LIMIT_OPTIONS)[number], page: 1 })
+                setParams({
+                  limit: Number(
+                    e.target.value,
+                  ) as (typeof LIMIT_OPTIONS)[number],
+                  page: 1,
+                })
               }
               className="block w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             >
@@ -309,7 +361,9 @@ export function Home() {
                     </p>
                   )}
                   {job.jobLocation && (
-                    <p className="mt-1 text-sm text-gray-500">{job.jobLocation}</p>
+                    <p className="mt-1 text-sm text-gray-500">
+                      {job.jobLocation}
+                    </p>
                   )}
                   <p className="mt-2 text-xs text-gray-400">
                     Status:{" "}
