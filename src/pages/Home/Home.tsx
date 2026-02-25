@@ -1,8 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { axiosInstance } from "../../config/axios";
-import type { Job } from "../../types/job";
-import { JOB_STATUSES, JOB_TYPES } from "../../types/job";
+import { JOB_STATUSES, JOB_TYPES, type Job } from "../../types/job";
 
 const DEFAULT_LIMIT = 10;
 const SEARCH_DEBOUNCE_MS = 800;
