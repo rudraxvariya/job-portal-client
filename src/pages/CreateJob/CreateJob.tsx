@@ -78,16 +78,16 @@ export function CreateJob() {
   const labelClass = "block text-sm font-medium text-gray-700";
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-8">
+    <div className="max-w-xl mx-auto w-full py-4 sm:py-8">
       <Link
         to="/"
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 sm:mb-6"
       >
         ← Back to jobs
       </Link>
 
-      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-bold text-gray-900 mb-6">Create Job</h1>
+      <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
+        <h1 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Create Job</h1>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <Input
             id="create-job-company"
@@ -158,12 +158,12 @@ export function CreateJob() {
             placeholder="e.g. my city"
             {...register("jobLocation")}
           />
-          <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={isSubmitting}>
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto min-h-[44px]">
               {isSubmitting ? "Creating..." : "Create Job"}
             </Button>
-            <Link to="/">
-              <Button type="button" variant="secondary">
+            <Link to="/" className="w-full sm:w-auto">
+              <Button type="button" variant="secondary" className="w-full sm:w-auto min-h-[44px]">
                 Cancel
               </Button>
             </Link>

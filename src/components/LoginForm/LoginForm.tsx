@@ -6,7 +6,7 @@ import * as yup from "yup";
 import { toast } from "react-toastify";
 import { AxiosError } from "axios";
 import { Input, Button } from "../common";
-import { setLoggedInThisSession } from "../../lib/auth";
+import { setAuthToken, setLoggedInThisSession } from "../../lib/auth";
 import { axiosInstance } from "../../config/axios";
 
 export interface LoginFormData {
@@ -47,10 +47,15 @@ export function LoginForm() {
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      await axiosInstance.post("/auth/login", {
-        email: data.email,
-        password: data.password,
-      });
+      const res = await axiosInstance.post<{ token?: string; accessToken?: string; access_token?: string }>(
+        "/auth/login",
+        { email: data.email, password: data.password },
+      );
+      const token =
+        res.data?.token ?? res.data?.accessToken ?? res.data?.access_token;
+      if (token) {
+        setAuthToken(token);
+      }
       setLoggedInThisSession();
       toast.success("Signed in successfully.");
       navigate("/", { replace: true });

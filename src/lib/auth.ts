@@ -1,56 +1,62 @@
 import { axiosInstance } from "../config/axios";
+import { AUTH_TOKEN_STORAGE_KEY } from "../constants/auth";
 
-/**
- * Cookie name where the auth token is stored (set by the backend on login).
- * Change this if your API uses a different cookie name.
- */
-export const AUTH_TOKEN_COOKIE = "token";
+export { AUTH_TOKEN_STORAGE_KEY };
 
-/** Set to true after successful login so redirect to home works (e.g. when token is httpOnly). */
+/** Set to true after successful login so redirect works before next request. */
 let loggedInThisSession = false;
 
 /**
- * Call this after a successful login so the user is treated as authenticated
- * until the next full page load (when cookie will be sent by the browser).
+ * Call this after a successful login so the user is treated as authenticated immediately.
  */
 export function setLoggedInThisSession(): void {
   loggedInThisSession = true;
 }
 
 /**
- * Call this after logout to clear the in-session auth flag.
+ * Saves the auth token to localStorage. Call after successful login.
+ */
+export function setAuthToken(token: string): void {
+  localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+}
+
+/**
+ * Returns the auth token from localStorage if present, otherwise null.
+ */
+export function getAuthToken(): string | null {
+  try {
+    return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Removes the auth token from localStorage. Call on logout.
+ */
+export function clearAuthToken(): void {
+  localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY);
+}
+
+/**
+ * Call this after logout to clear the token and in-session auth flag.
  */
 export function clearLoggedInSession(): void {
   loggedInThisSession = false;
+  clearAuthToken();
 }
 
 /**
- * Reads a cookie value by name.
- */
-function getCookie(name: string): string | null {
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? match[2].trim() : null;
-}
-
-/**
- * Returns the auth token from cookies if present, otherwise null.
- * Note: httpOnly cookies are not visible to JS; use verifyAuth() to detect session after refresh.
- */
-export function getAuthToken(): string | null {
-  return getCookie(AUTH_TOKEN_COOKIE);
-}
-
-/**
- * Returns true if the user is considered logged in (token in cookies or just logged in this session).
+ * Returns true if the user is considered logged in (token in localStorage or just logged in this session).
  */
 export function isAuthenticated(): boolean {
   return loggedInThisSession || Boolean(getAuthToken());
 }
 
 /**
- * Asks the backend if the current request is authenticated (cookie is sent automatically).
- * Call this on app load when getAuthToken() is false (e.g. token is httpOnly).
- * On success, sets loggedInThisSession so the user stays logged in after refresh.
+ * Asks the backend if the current request is authenticated (Authorization header is set by axios).
+ * Call this on app load when getAuthToken() is false to restore session from a valid token.
+ * On success, sets loggedInThisSession so the user stays logged in.
  */
 export async function verifyAuth(): Promise<boolean> {
   try {

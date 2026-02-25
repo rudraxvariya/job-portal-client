@@ -228,15 +228,15 @@ export function JobDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto w-full py-6 sm:py-8">
         <div className="text-gray-500">Loading...</div>
       </div>
     );
   }
   if (error || !job) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3">
+      <div className="max-w-2xl mx-auto w-full py-6 sm:py-8">
+        <div className="rounded-lg bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm sm:text-base">
           {error ?? "Job not found"}
         </div>
         <Link
@@ -250,10 +250,10 @@ export function JobDetail() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto w-full py-4 sm:py-8">
       <Link
         to="/"
-        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
+        className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4 sm:mb-6"
       >
         ← Back to jobs
       </Link>
@@ -261,9 +261,9 @@ export function JobDetail() {
       {editing ? (
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="rounded-xl border border-gray-200 bg-white p-6 space-y-4"
+          className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 space-y-4"
         >
-          <h1 className="text-xl font-bold text-gray-900">Edit Job</h1>
+          <h1 className="text-lg sm:text-xl font-bold text-gray-900">Edit Job</h1>
           <Input
             id="edit-job-company"
             label="Company"
@@ -341,14 +341,15 @@ export function JobDetail() {
             error={errors.jobLocation?.message}
             {...register("jobLocation")}
           />
-          <div className="flex gap-3 pt-2">
-            <Button type="submit" disabled={saving}>
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4">
+            <Button type="submit" disabled={saving} className="w-full sm:w-auto min-h-[44px]">
               {saving ? "Saving..." : "Save"}
             </Button>
             <Button
               type="button"
               variant="secondary"
               onClick={handleCancelEdit}
+              className="w-full sm:w-auto min-h-[44px]"
             >
               Cancel
             </Button>
@@ -356,8 +357,8 @@ export function JobDetail() {
         </form>
       ) : (
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex gap-4">
-            <div className="shrink-0 w-16 h-16 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
+          <div className="p-4 sm:p-6 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
+            <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden self-start sm:self-auto">
               {job.companyLogo ? (
                 <img
                   src={job.companyLogo}
@@ -379,7 +380,7 @@ export function JobDetail() {
                   {job.jobStatus ?? "—"}
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 wrap-break-word">
                 {job.position ?? "Untitled"}
               </h1>
               {job.company && (
@@ -392,9 +393,9 @@ export function JobDetail() {
               )}
             </div>
           </div>
-          <div className="p-6 flex flex-wrap gap-3">
-            <Button onClick={() => setEditing(true)}>Edit</Button>
-            <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+          <div className="p-4 sm:p-6 flex flex-col sm:flex-row gap-3">
+            <Button onClick={() => setEditing(true)} className="w-full sm:w-auto min-h-[44px]">Edit</Button>
+            <Button variant="danger" onClick={handleDelete} disabled={deleting} className="w-full sm:w-auto min-h-[44px]">
               {deleting ? "Deleting..." : "Delete"}
             </Button>
           </div>

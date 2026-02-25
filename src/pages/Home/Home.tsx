@@ -175,20 +175,20 @@ export function Home() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">All Jobs</h1>
+    <div className="max-w-5xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">All Jobs</h1>
         <Link
           to="/jobs/new"
-          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors"
+          className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-3 min-h-[44px] text-sm font-semibold text-white shadow-sm hover:bg-blue-500 transition-colors touch-manipulation"
         >
           Create Job
         </Link>
       </div>
 
       {/* Search, filters, sort, limit */}
-      <div className="mb-6 p-4 rounded-xl border border-gray-200 bg-white shadow-sm space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl border border-gray-200 bg-white shadow-sm space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
           <div className="sm:col-span-2 lg:col-span-1">
             <label
               htmlFor="home-search"
@@ -306,7 +306,7 @@ export function Home() {
       )}
 
       {jobs.length === 0 ? (
-        <div className="rounded-xl border border-gray-200 bg-white p-12 text-center">
+        <div className="rounded-xl border border-gray-200 bg-white p-8 sm:p-12 text-center">
           <p className="text-gray-500 mb-4">No jobs found.</p>
           <Link
             to="/jobs/new"
@@ -320,14 +320,14 @@ export function Home() {
           <p className="text-sm text-gray-500 mb-4">
             Showing {jobs.length} of {totalJobs} job{totalJobs !== 1 ? "s" : ""}
           </p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
               <Link
                 key={job._id}
                 to={`/jobs/${job._id}`}
-                className="flex gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:border-blue-200 hover:shadow-md transition-all text-left"
+                className="flex gap-3 sm:gap-4 rounded-xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm hover:border-blue-200 hover:shadow-md transition-all text-left min-h-[88px]"
               >
-                <div className="shrink-0 w-14 h-14 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
+                <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center overflow-hidden">
                   {(() => {
                     const logoUrl =
                       job.companyLogo ??
@@ -346,8 +346,8 @@ export function Home() {
                   })()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="flex justify-between items-start gap-2">
-                    <h2 className="text-lg font-semibold text-gray-900 truncate">
+                  <div className="flex justify-between items-start gap-2 min-w-0">
+                    <h2 className="text-base sm:text-lg font-semibold text-gray-900 truncate">
                       {job.position ?? "Untitled"}
                     </h2>
                     <span className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
@@ -375,16 +375,16 @@ export function Home() {
 
           {/* Pagination - compact with ellipsis for large page counts */}
           {numOfPages > 1 && (
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            <div className="mt-6 sm:mt-8 flex flex-wrap items-center justify-center gap-2">
               <button
                 type="button"
                 onClick={() => goToPage(page - 1)}
                 disabled={page <= 1}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 min-h-[44px] text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none touch-manipulation"
               >
                 Previous
               </button>
-              <div className="flex items-center justify-center gap-1">
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 {getPaginationItems(page, numOfPages).map((item, i) =>
                   item === "ellipsis" ? (
                     <span
@@ -399,7 +399,7 @@ export function Home() {
                       key={item}
                       type="button"
                       onClick={() => goToPage(item)}
-                      className={`min-w-9 rounded-lg border px-3 py-2 text-sm font-medium ${
+                      className={`min-w-9 min-h-[44px] rounded-lg border px-3 py-2 text-sm font-medium touch-manipulation ${
                         item === page
                           ? "border-blue-600 bg-blue-600 text-white"
                           : "border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
@@ -414,7 +414,7 @@ export function Home() {
                 type="button"
                 onClick={() => goToPage(page + 1)}
                 disabled={page >= numOfPages}
-                className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none"
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 min-h-[44px] text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none touch-manipulation"
               >
                 Next
               </button>
