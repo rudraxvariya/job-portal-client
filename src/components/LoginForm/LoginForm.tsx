@@ -47,12 +47,11 @@ export function LoginForm() {
     setSubmitError(null);
     setIsSubmitting(true);
     try {
-      const res = await axiosInstance.post<{ token?: string; accessToken?: string; access_token?: string }>(
-        "/auth/login",
-        { email: data.email, password: data.password },
-      );
-      const token =
-        res.data?.token ?? res.data?.accessToken ?? res.data?.access_token;
+      const res = await axiosInstance.post("/auth/login", {
+        email: data.email,
+        password: data.password,
+      });
+      const token = res.data?.token;
       if (token) {
         setAuthToken(token);
       }
